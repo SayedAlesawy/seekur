@@ -75,6 +75,13 @@ func (connectionObj *Connection) RecvString(flags zmq4.Flag) (string, bool) {
 	return msg, errors.IsError(err)
 }
 
+// RecvBytes A function that synchronously receives a bytes msg from the connection
+func (connectionObj *Connection) RecvBytes(flags zmq4.Flag) ([]byte, bool) {
+	msg, err := connectionObj.socket.RecvBytes(flags)
+
+	return msg, errors.IsError(err)
+}
+
 // BuildConnectionString A function to build the connection string
 func BuildConnectionString(ip string, port string) string {
 	return fmt.Sprintf("tcp://%s:%s", ip, port)
