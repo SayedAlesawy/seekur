@@ -3,6 +3,8 @@ package main
 import(
 	"log"
 	"time"
+	"os"
+	"strconv"
 
 	"github.com/pebbe/zmq4"
 	"github.com/SayedAlesawy/seekur/drivers/tcp"
@@ -11,12 +13,20 @@ import(
 
 var logSign = "[Sender]"
 var ip = "127.0.0.1"
-var port = "9902"
+var port string
+var keyLength int
 
 func main() {
+	// Read params
+	args := os.Args
+	port = args[1]
+	keyLength, _ = strconv.Atoi(args[2])
+
 	// Generate a key pair for the encyrption
 	log.Println(logSign, "Generating key pair")
-	pubKey, privKey, err := rsa.GenerateKeyPair(1024)
+	start := time.Now()
+	pubKey, privKey, err := rsa.GenerateKeyPair(keyLength)
+	keyGenerationTime := time.Since(start)
 	if err {
 		log.Fatal(logSign, "Failed to generate encryption keys")
 	}
@@ -56,7 +66,9 @@ func main() {
 	msg := "I use 2 programming languages, Go and rails"
 
 	// Encrypt the message before sending
+	start = time.Now()
 	encryptedMsg := rsa.Encrypt(pubKey, []byte(msg))
+	encryptionTime := time.Since(start)
 
 	// Send encrypted message
 	log.Println(logSign, "Sending message: ", msg)
@@ -67,4 +79,9 @@ func main() {
 
 	// Wait for message recveial
 	time.Sleep(1 * time.Second)
+
+	// Print stats
+	log.Println(logSign, "Key length = ", keyLength)
+	log.Println(logSign, "Key generation time = ", keyGenerationTime)
+	log.Println(logSign, "Encyrption time = ", encryptionTime)
 }

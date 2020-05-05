@@ -3,6 +3,8 @@ package main
 import(
 	"log"
 	"bytes"
+	"time"
+	"os"
 
 	"github.com/pebbe/zmq4"
 	"github.com/SayedAlesawy/seekur/drivers/tcp"
@@ -11,9 +13,13 @@ import(
 
 var logSign = "[Receiver]"
 var ip = "127.0.0.1"
-var port = "9902"
+var port string
 
 func main() {
+	// Read params
+	args := os.Args
+	port = args[1]
+
 	// Construct the communicaiton endpoint with receiver
 	endpoint := tcp.BuildConnectionString(ip, port)
 
@@ -48,9 +54,14 @@ func main() {
 	}
 
 	// Decrypt the received message
+	start := time.Now()
 	decyrptedMsg := rsa.Decrypt(&privKey, recvMsg)
+	decryptionTime := time.Since(start)
 
 	// Print plain text after decryption
 	plainTextMsg := bytes.NewBuffer(decyrptedMsg.Bytes()).String()
 	log.Println(logSign, "Received message: ", plainTextMsg)
+
+	log.Println(logSign, "Key length = ", privKey.N.BitLen())
+	log.Println(logSign, "Decyrption time = ", decryptionTime)
 }
